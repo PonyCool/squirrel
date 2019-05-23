@@ -12,7 +12,10 @@ class Timestamp implements StrategyInterface
 {
     public function validator(string $param): bool
     {
-        if (strtotime(date('Y-m-d H:i:s', (int)$param)) === (int)$param) {
+        if (!(int)$param) {
+            return false;
+        }
+        if ((string)strtotime(date('Y-m-d H:i:s', (int)$param)) === $param) {
             return $param;
         } else {
             return false;
