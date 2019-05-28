@@ -49,8 +49,8 @@ class ValidationStrategy extends Strategy
     public function validator(string $param): bool
     {
         try {
-            $strategyReflection = new ReflectionClass('PonyCool\\Jwt\\Validation\\Strategy\\' . $this->strategy);
-            if (!$strategyReflection->isSubclassOf('PonyCool\\Jwt\\Validation\\Strategy\\StrategyInterface')) {
+            $strategyReflection = new ReflectionClass(__NAMESPACE__ . '\\Strategy\\' . $this->strategy);
+            if (!$strategyReflection->isSubclassOf(__NAMESPACE__ . '\\Strategy\\StrategyInterface')) {
                 throw new ReflectionException($this->strategy . "验证策略未实现验证策略接口");
             }
             $validationStrategy = $strategyReflection->newInstance();
