@@ -22,9 +22,8 @@ $routes = Services::routes(true);
 
 // Load the system's routing file first, so that the app and ENVIRONMENT
 // can override as needed.
-if (file_exists(SYSTEMPATH . 'Config/Routes.php'))
-{
-	require SYSTEMPATH . 'Config/Routes.php';
+if (file_exists(SYSTEMPATH . 'Config/Routes.php')) {
+    require SYSTEMPATH . 'Config/Routes.php';
 }
 
 /**
@@ -75,6 +74,21 @@ $routes->setAutoRoute(true);
 $routes->get('/', 'Home::index');
 
 /**
+ * 自定义路由
+ */
+$url = current_url(true);
+$firstSegment = $url->getSegment(1);
+$ns = [
+    'api' => 'PonyCool\Api\Controllers'
+];
+if (key_exists($firstSegment, $ns)) {
+    $currUrl = current_url(false);
+    $currUrl = str_replace($firstSegment . '/', '', $currUrl);
+    $url->setURI($currUrl);
+    $routes->setDefaultNamespace($ns[$firstSegment]);
+}
+
+/**
  * --------------------------------------------------------------------
  * Additional Routing
  * --------------------------------------------------------------------
@@ -87,7 +101,6 @@ $routes->get('/', 'Home::index');
  * You will have access to the $routes object within that file without
  * needing to reload it.
  */
-if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php'))
-{
-	require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
+if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php')) {
+    require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
 }
