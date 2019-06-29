@@ -3,4 +3,4 @@
 .DS_Store
 .env
 writable
-pubulic\src\node_modules
+/pubulic/src/node_modules
