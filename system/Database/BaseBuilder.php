@@ -1293,7 +1293,7 @@ class BaseBuilder
 	 *
 	 * @return BaseBuilder
 	 */
-	public function limit(int $value = null, int $offset = 0)
+	public function limit(int $value = null, ?int $offset = 0)
 	{
 		if (! is_null($value))
 		{
@@ -1356,7 +1356,7 @@ class BaseBuilder
 	 *
 	 * @return BaseBuilder
 	 */
-	public function set($key, string $value = '', bool $escape = null)
+	public function set($key, ?string $value = '', bool $escape = null)
 	{
 		$key = $this->objectToArray($key);
 

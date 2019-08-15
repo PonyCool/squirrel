@@ -50,11 +50,10 @@ class Autoload extends \CodeIgniter\Config\AutoloadConfig
 		 *   `];
 		 */
 		$psr4 = [
-			'Config'      => APPPATH . 'Config',
-			APP_NAMESPACE => APPPATH,                // For custom namespace
-			'App'         => APPPATH,                // To ensure filters, etc still found,
-            'PonyCool'         => ROOTPATH . 'PonyCool',
-            'PonyCool\Jwt'=> APPPATH . 'ThirdParty/PonyCool/Jwt',
+			'Config'            => APPPATH . 'Config',
+			APP_NAMESPACE       => APPPATH,                // For custom namespace
+			'App'               => APPPATH,                // To ensure filters, etc still found,
+            PONYCOOL_NAMESPACE  => PONYCOOL_PATH,
 		];
 
 		/**
