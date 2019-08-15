@@ -49,11 +49,13 @@ class Account extends Entity
     }
 
     /**
-     * @return mixed
+     * 获取盐值
+     * @return string
      */
-    public function getSalt()
+    public function getSalt(): string
     {
-        return $this->salt;
+        $salt = $this->attributes['salt'];
+        return $salt;
     }
 
 }

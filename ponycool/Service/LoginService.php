@@ -23,8 +23,7 @@ class LoginService extends BaseService
         $account = $accountModel->where('account_name', $account_name)
             ->first();
         if (!is_null($account)) {
-            var_dump($account->getSalt());
-            $encryPwd = hash_hmac('sha256', $pwd, (string)$account->salt);
+            $encryPwd = hash_hmac('sha256', $pwd, $account->salt);
             if ($account->pwd === $encryPwd) {
                 $secret = getenv('app.jwt.secret');
                 try {
