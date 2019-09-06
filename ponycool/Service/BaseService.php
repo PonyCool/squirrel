@@ -10,37 +10,19 @@ class BaseService
 {
     protected $db;
     protected $table;
-    private $readDB;
-    private $writeDB;
 
     public function __construct()
     {
-        if (getenv('database.read.database')) {
-            $this->setReadDB('read');
-        }
-        if (getenv('database.write.database')) {
-            $this->setWriteDB('write');
-        }
+        $env = getenv('CI_ENVIRONMENT');
+        $this->setDb($env);
     }
 
     /**
      * 获取数据库连接
-     * @param int $isWriteType 0：单节点，1：读库，2：写库
      * @return object
      */
-    public function getDb(int $isWriteType = 0): object
+    public function getDb(): object
     {
-        if (!$isWriteType) {
-            if (is_null($this->db)) {
-                return Database::connect();
-            }
-        }
-        if (1 === $isWriteType) {
-            $this->setDb($this->getReadDB());
-        }
-        if (2 === $isWriteType) {
-            $this->setDb($this->getWriteDB());
-        }
         if (is_null($this->db)) {
             throw new DatabaseException('数据库设置错误');
         }
@@ -53,38 +35,6 @@ class BaseService
     public function setDb(string $db): void
     {
         $this->db = $db;
-    }
-
-    /**
-     * @return mixed
-     */
-    private function getReadDB()
-    {
-        return $this->readDB;
-    }
-
-    /**
-     * @param mixed $readDB
-     */
-    private function setReadDB($readDB): void
-    {
-        $this->readDB = $readDB;
-    }
-
-    /**
-     * @return mixed
-     */
-    private function getWriteDB()
-    {
-        return $this->writeDB;
-    }
-
-    /**
-     * @param mixed $writeDB
-     */
-    private function setWriteDB($writeDB): void
-    {
-        $this->writeDB = $writeDB;
     }
 
     /**
