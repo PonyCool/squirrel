@@ -7,7 +7,7 @@ use PonyCool\Core\Jwt\Json\Json;
 use PonyCool\Core\Jwt\Signature\Signature;
 use PonyCool\Core\Jwt\Base64\Base64Url;
 use PonyCool\Core\Jwt\Validation\ValidationStrategy;
-use PonyCool\Core\wt\Exception\{TokenException,
+use PonyCool\Core\Jwt\Exception\{TokenException,
     ValueException,
     ExpiredException,
     ArgumentException,
