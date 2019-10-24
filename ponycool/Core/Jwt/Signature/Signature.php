@@ -47,6 +47,7 @@ class Signature
      */
     protected function loadAlg(string $alg): object
     {
+        $alg = ucfirst(strtolower($alg));
         $algClass = __NAMESPACE__ . '\\' . $alg;
         if (!class_exists($algClass)) {
             throw new AlgException("JWT签名加密算法不存在");
