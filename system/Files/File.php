@@ -1,61 +1,39 @@
 <?php
 
 /**
- * CodeIgniter
+ * This file is part of the CodeIgniter 4 framework.
  *
- * An open source application development framework for PHP
+ * (c) CodeIgniter Foundation <admin@codeigniter.com>
  *
- * This content is released under the MIT License (MIT)
- *
- * Copyright (c) 2014-2019 British Columbia Institute of Technology
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @package    CodeIgniter
- * @author     CodeIgniter Dev Team
- * @copyright  2014-2019 British Columbia Institute of Technology (https://bcit.ca/)
- * @license    https://opensource.org/licenses/MIT	MIT License
- * @link       https://codeigniter.com
- * @since      Version 4.0.0
- * @filesource
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace CodeIgniter\Files;
 
-use SplFileInfo;
 use CodeIgniter\Files\Exceptions\FileException;
 use CodeIgniter\Files\Exceptions\FileNotFoundException;
+use Config\Mimes;
+use SplFileInfo;
 
 /**
  * Wrapper for PHP's built-in SplFileInfo, with goodies.
- *
- * @package CodeIgniter\Files
  */
 class File extends SplFileInfo
 {
-
 	/**
 	 * The files size in bytes
 	 *
-	 * @var float
+	 * @var integer
 	 */
 	protected $size;
+
+	/**
+	 * Original MimeType
+	 *
+	 * @var null|string
+	 */
+	protected $originalMimeType = null;
 
 	//--------------------------------------------------------------------
 
@@ -85,29 +63,31 @@ class File extends SplFileInfo
 	 * the file in the $_FILES array if available, as PHP calculates this based
 	 * on the actual size transmitted.
 	 *
-	 * @param string $unit The unit to return:
-	 *      - b   Bytes
-	 *      - kb  Kilobytes
-	 *      - mb  Megabytes
-	 *
-	 * @return integer|null The file size in bytes or null if unknown.
+	 * @return integer The file size in bytes
 	 */
-	public function getSize(string $unit = 'b')
+	public function getSize()
 	{
-		if (is_null($this->size))
-		{
-			$this->size = filesize($this->getPathname());
-		}
+		return $this->size ?? ($this->size = parent::getSize());
+	}
 
+	/**
+	 * Retrieve the file size by unit.
+	 *
+	 * @param string $unit
+	 *
+	 * @return integer|string
+	 */
+	public function getSizeByUnit(string $unit = 'b')
+	{
 		switch (strtolower($unit))
 		{
 			case 'kb':
-				return number_format($this->size / 1024, 3);
+				return number_format($this->getSize() / 1024, 3);
 			case 'mb':
-				return number_format(($this->size / 1024) / 1024, 3);
+				return number_format(($this->getSize() / 1024) / 1024, 3);
+			default:
+				return $this->getSize();
 		}
-
-		return (int) $this->size;
 	}
 
 	//--------------------------------------------------------------------
@@ -120,7 +100,7 @@ class File extends SplFileInfo
 	 */
 	public function guessExtension(): ?string
 	{
-		return \Config\Mimes::guessExtensionFromType($this->getMimeType());
+		return Mimes::guessExtensionFromType($this->getMimeType());
 	}
 
 	//--------------------------------------------------------------------
@@ -130,12 +110,19 @@ class File extends SplFileInfo
 	 * the $_FILES array, but should use other methods to more accurately
 	 * determine the type of file, like finfo, or mime_content_type().
 	 *
-	 * @return string|null The media type we determined it to be.
+	 * @return string The media type we determined it to be.
 	 */
 	public function getMimeType(): string
 	{
+		if (! function_exists('finfo_open'))
+		{
+			// @codeCoverageIgnoreStart
+			return $this->originalMimeType ?? 'application/octet-stream';
+			// @codeCoverageIgnoreEnd
+		}
+
 		$finfo    = finfo_open(FILEINFO_MIME_TYPE);
-		$mimeType = finfo_file($finfo, $this->getRealPath());
+		$mimeType = finfo_file($finfo, $this->getRealPath() ?: $this->__toString());
 		finfo_close($finfo);
 		return $mimeType;
 	}
@@ -151,7 +138,7 @@ class File extends SplFileInfo
 	public function getRandomName(): string
 	{
 		$extension = $this->getExtension();
-		$extension = empty($extension) ? '' : '.' . $extension;	
+		$extension = empty($extension) ? '' : '.' . $extension;
 		return time() . '_' . bin2hex(random_bytes(10)) . $extension;
 	}
 
@@ -164,7 +151,7 @@ class File extends SplFileInfo
 	 * @param string|null $name
 	 * @param boolean     $overwrite
 	 *
-	 * @return \CodeIgniter\Files\File
+	 * @return File
 	 */
 	public function move(string $targetPath, string $name = null, bool $overwrite = false)
 	{
@@ -172,7 +159,7 @@ class File extends SplFileInfo
 		$name        = $name ?? $this->getBaseName();
 		$destination = $overwrite ? $targetPath . $name : $this->getDestination($targetPath . $name);
 
-		$oldName = empty($this->getRealPath()) ? $this->getPath() : $this->getRealPath();
+		$oldName = $this->getRealPath() ?: $this->__toString();
 
 		if (! @rename($oldName, $destination))
 		{
@@ -180,7 +167,7 @@ class File extends SplFileInfo
 			throw FileException::forUnableToMove($this->getBasename(), $targetPath, strip_tags($error['message']));
 		}
 
-		@chmod($targetPath, 0777 & ~umask());
+		@chmod($destination, 0777 & ~umask());
 
 		return new File($destination);
 	}
@@ -204,7 +191,7 @@ class File extends SplFileInfo
 	{
 		while (is_file($destination))
 		{
-			$info = pathinfo($destination);
+			$info      = pathinfo($destination);
 			$extension = isset($info['extension']) ? '.' . $info['extension'] : '';
 			if (strpos($info['filename'], $delimiter) !== false)
 			{

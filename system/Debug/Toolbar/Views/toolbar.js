@@ -4,19 +4,23 @@
 
 var ciDebugBar = {
 
+	toolbarContainer : null,
 	toolbar : null,
 	icon : null,
 
 	//--------------------------------------------------------------------
 
 	init : function () {
-		this.toolbar = document.getElementById('debug-bar');
-		this.icon    = document.getElementById('debug-icon');
+		this.toolbarContainer = document.getElementById('toolbarContainer');
+		this.toolbar          = document.getElementById('debug-bar');
+		this.icon             = document.getElementById('debug-icon');
 
 		ciDebugBar.createListeners();
 		ciDebugBar.setToolbarState();
 		ciDebugBar.setToolbarPosition();
+		ciDebugBar.setToolbarTheme();
 		ciDebugBar.toggleViewsHints();
+		ciDebugBar.routerLink();
 
 		document.getElementById('debug-bar-link').addEventListener('click', ciDebugBar.toggleToolbar, true);
 		document.getElementById('debug-icon-link').addEventListener('click', ciDebugBar.toggleToolbar, true);
@@ -504,6 +508,56 @@ var ciDebugBar = {
 
 	//--------------------------------------------------------------------
 
+	setToolbarTheme: function () {
+		var btnTheme    = document.getElementById('toolbar-theme');
+		var isDarkMode  = window.matchMedia("(prefers-color-scheme: dark)").matches;
+		var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches;
+
+		// If a cookie is set with a value, we force the color scheme
+		if (ciDebugBar.readCookie('debug-bar-theme') === 'dark')
+		{
+			ciDebugBar.removeClass(ciDebugBar.toolbarContainer, 'light');
+			ciDebugBar.addClass(ciDebugBar.toolbarContainer, 'dark');
+		}
+		else if (ciDebugBar.readCookie('debug-bar-theme') === 'light')
+		{
+			ciDebugBar.removeClass(ciDebugBar.toolbarContainer, 'dark');
+			ciDebugBar.addClass(ciDebugBar.toolbarContainer, 'light');
+		}
+
+		btnTheme.addEventListener('click', function () {
+			var theme = ciDebugBar.readCookie('debug-bar-theme');
+
+			if (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+			{
+				// If there is no cookie, and "prefers-color-scheme" is set to "dark"
+				// It means that the user wants to switch to light mode
+				ciDebugBar.createCookie('debug-bar-theme', 'light', 365);
+				ciDebugBar.removeClass(ciDebugBar.toolbarContainer, 'dark');
+				ciDebugBar.addClass(ciDebugBar.toolbarContainer, 'light');
+			}
+			else
+			{
+				if (theme === 'dark')
+				{
+					ciDebugBar.createCookie('debug-bar-theme', 'light', 365);
+					ciDebugBar.removeClass(ciDebugBar.toolbarContainer, 'dark');
+					ciDebugBar.addClass(ciDebugBar.toolbarContainer, 'light');
+				}
+				else
+				{
+					// In any other cases: if there is no cookie, or the cookie is set to
+					// "light", or the "prefers-color-scheme" is "light"...
+					ciDebugBar.createCookie('debug-bar-theme', 'dark', 365);
+					ciDebugBar.removeClass(ciDebugBar.toolbarContainer, 'light');
+					ciDebugBar.addClass(ciDebugBar.toolbarContainer, 'dark');
+				}
+			}
+		}, true);
+	},
+
+	//--------------------------------------------------------------------
+
 	/**
 	 * Helper to create a cookie.
 	 *
@@ -525,7 +579,7 @@ var ciDebugBar = {
 			var expires = "";
 		}
 
-		document.cookie = name + "=" + value + expires + "; path=/";
+		document.cookie = name + "=" + value + expires + "; path=/; samesite=Lax";
 	},
 
 	//--------------------------------------------------------------------
@@ -547,5 +601,72 @@ var ciDebugBar = {
 			}
 		}
 		return null;
+	},
+
+	//--------------------------------------------------------------------
+
+	trimSlash: function (text) {
+		return text.replace(/^\/|\/$/g, '');
+	},
+
+	routerLink: function () {
+		var row, _location;
+		var rowGet = document.querySelectorAll('#debug-bar td[data-debugbar-route="GET"]');
+		var patt   = /\((?:[^)(]+|\((?:[^)(]+|\([^)(]*\))*\))*\)/;
+
+		for (var i = 0; i < rowGet.length; i++)
+		{
+			row = rowGet[i];
+			if (!/\/\(.+?\)/.test(rowGet[i].innerText))
+			{
+				row.style = 'cursor: pointer;';
+				row.setAttribute('title', location.origin + '/' + ciDebugBar.trimSlash(row.innerText));
+				row.addEventListener('click', function (ev) {
+					_location          = location.origin + '/' + ciDebugBar.trimSlash(ev.target.innerText);
+					var redirectWindow = window.open(_location, '_blank');
+					redirectWindow.location;
+				});
+			}
+			else
+			{
+				row.innerHTML = '<div>' + row.innerText + '</div>'
+					+ '<form data-debugbar-route-tpl="' + ciDebugBar.trimSlash(row.innerText.replace(patt, '?')) + '">'
+					+ row.innerText.replace(patt, '<input type="text" placeholder="$1">')
+					+ '<input type="submit" value="Go" style="margin-left: 4px;">'
+					+ '</form>';
+			}
+		}
+
+		rowGet = document.querySelectorAll('#debug-bar td[data-debugbar-route="GET"] form');
+		for (var i = 0; i < rowGet.length; i++)
+		{
+			row = rowGet[i];
+
+			row.addEventListener('submit', function (event) {
+				event.preventDefault()
+				var inputArray = [], t = 0;
+				var input      = event.target.querySelectorAll('input[type=text]');
+				var tpl        = event.target.getAttribute('data-debugbar-route-tpl');
+
+				for (var n = 0; n < input.length; n++)
+				{
+					if (input[n].value.length > 0)
+					{
+						inputArray.push(input[n].value);
+					}
+				}
+
+				if (inputArray.length > 0)
+				{
+					_location = location.origin + '/' + tpl.replace(/\?/g, function () {
+						return inputArray[t++]
+					});
+
+					var redirectWindow = window.open(_location, '_blank');
+					redirectWindow.location;
+				}
+			})
+		}
 	}
+
 };

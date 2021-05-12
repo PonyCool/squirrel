@@ -56,15 +56,15 @@ function loadDoc(time) {
 		}
 	};
 
-	xhttp.open("GET", url + "/?debugbar_time=" + time, true);
+	xhttp.open("GET", url + "?debugbar_time=" + time, true);
 	xhttp.send();
 }
 
 // Track all AJAX requests
 if (window.ActiveXObject) {
-    var oldXHR = new ActiveXObject('Microsoft.XMLHTTP');
+	var oldXHR = new ActiveXObject('Microsoft.XMLHTTP');
 } else {
-    var oldXHR = window.XMLHttpRequest;
+	var oldXHR = window.XMLHttpRequest;
 }
 
 function newXHR() {
@@ -75,9 +75,11 @@ function newXHR() {
 			var debugbarTime = realXHR.getResponseHeader('Debugbar-Time');
 			if (debugbarTime) {
 				var h2 = document.querySelector('#ci-history > h2');
-				h2.innerHTML = 'History <small>You have new debug data.</small> <button onclick="loadDoc(' + debugbarTime + ')">Update</button>';
-				var badge = document.querySelector('a[data-tab="ci-history"] > span > .badge');
-				badge.className += ' active';
+				if(h2) {
+					h2.innerHTML = 'History <small>You have new debug data.</small> <button onclick="loadDoc(' + debugbarTime + ')">Update</button>';
+					var badge = document.querySelector('a[data-tab="ci-history"] > span > .badge');
+					badge.className += ' active';
+				}
 			}
 		}
 	}, false);

@@ -1,14 +1,27 @@
 <?php
 
+/**
+ * This file is part of the CodeIgniter 4 framework.
+ *
+ * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace CodeIgniter\Router\Exceptions;
 
+use Exception;
+
 /**
- * Redirect exception
+ * RedirectException
  */
-class RedirectException extends \Exception
+class RedirectException extends Exception
 {
-	public static function forUnableToRedirect(string $route, string $code)
-	{
-		return new static(lang('Redirect.forUnableToRedirect', [$route, $code]));
-	}
+	/**
+	 * Status code for redirects
+	 *
+	 * @var integer
+	 */
+	protected $code = 302;
 }

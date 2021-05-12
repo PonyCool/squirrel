@@ -1,43 +1,19 @@
 <?php
+
 /**
- * CodeIgniter
+ * This file is part of the CodeIgniter 4 framework.
  *
- * An open source application development framework for PHP
+ * (c) CodeIgniter Foundation <admin@codeigniter.com>
  *
- * This content is released under the MIT License (MIT)
- *
- * Copyright (c) 2014-2019 British Columbia Institute of Technology
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @package    CodeIgniter
- * @author     CodeIgniter Dev Team
- * @copyright  2014-2019 British Columbia Institute of Technology (https://bcit.ca/)
- * @license    https://opensource.org/licenses/MIT	MIT License
- * @link       https://codeigniter.com
- * @since      Version 4.0.0
- * @filesource
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace CodeIgniter\Debug;
 
-use CodeIgniter\Config\BaseConfig;
+use CodeIgniter\CodeIgniter;
+use CodeIgniter\Debug\Toolbar\Collectors\BaseCollector;
+use CodeIgniter\Debug\Toolbar\Collectors\Config;
 use CodeIgniter\Debug\Toolbar\Collectors\History;
 use CodeIgniter\Format\JSONFormatter;
 use CodeIgniter\Format\XMLFormatter;
@@ -45,6 +21,7 @@ use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
+use Config\Toolbar as ToolbarConfig;
 
 /**
  * Debug Toolbar
@@ -52,22 +29,20 @@ use Config\Services;
  * Displays a toolbar with bits of stats to aid a developer in debugging.
  *
  * Inspiration: http://prophiler.fabfuel.de
- *
- * @package CodeIgniter\Debug
  */
 class Toolbar
 {
 	/**
 	 * Toolbar configuration settings.
 	 *
-	 * @var BaseConfig
+	 * @var ToolbarConfig
 	 */
 	protected $config;
 
 	/**
 	 * Collectors to be used and displayed.
 	 *
-	 * @var \CodeIgniter\Debug\Toolbar\Collectors\BaseCollector[]
+	 * @var BaseCollector[]
 	 */
 	protected $collectors = [];
 
@@ -76,9 +51,9 @@ class Toolbar
 	/**
 	 * Constructor
 	 *
-	 * @param BaseConfig $config
+	 * @param ToolbarConfig $config
 	 */
-	public function __construct(BaseConfig $config)
+	public function __construct(ToolbarConfig $config)
 	{
 		$this->config = $config;
 
@@ -87,7 +62,7 @@ class Toolbar
 			if (! class_exists($collector))
 			{
 				log_message('critical', 'Toolbar collector does not exists(' . $collector . ').' .
-					'please check $collectors in the Config\Toolbar.php file.');
+						'please check $collectors in the Config\Toolbar.php file.');
 				continue;
 			}
 
@@ -100,10 +75,10 @@ class Toolbar
 	/**
 	 * Returns all the data required by Debug Bar
 	 *
-	 * @param float                               $startTime App start time
-	 * @param float                               $totalTime
-	 * @param \CodeIgniter\HTTP\RequestInterface  $request
-	 * @param \CodeIgniter\HTTP\ResponseInterface $response
+	 * @param float             $startTime App start time
+	 * @param float             $totalTime
+	 * @param RequestInterface  $request
+	 * @param ResponseInterface $response
 	 *
 	 * @return string JSON encoded data
 	 */
@@ -116,9 +91,9 @@ class Toolbar
 		$data['startTime']       = $startTime;
 		$data['totalTime']       = $totalTime * 1000;
 		$data['totalMemory']     = number_format((memory_get_peak_usage()) / 1024 / 1024, 3);
-		$data['segmentDuration'] = $this->roundTo($data['totalTime'] / 7, 5);
-		$data['segmentCount']    = (int)ceil($data['totalTime'] / $data['segmentDuration']);
-		$data['CI_VERSION']      = \CodeIgniter\CodeIgniter::CI_VERSION;
+		$data['segmentDuration'] = $this->roundTo($data['totalTime'] / 7);
+		$data['segmentCount']    = (int) ceil($data['totalTime'] / $data['segmentDuration']);
+		$data['CI_VERSION']      = CodeIgniter::CI_VERSION;
 		$data['collectors']      = [];
 
 		foreach ($this->collectors as $collector)
@@ -134,7 +109,7 @@ class Toolbar
 			{
 				foreach ($items as $key => $value)
 				{
-					$varData[esc($key)] = is_string($value) ? esc($value) : print_r($value, true);
+					$varData[esc($key)] = is_string($value) ? esc($value) : '<pre>' . esc(print_r($value, true)) . '</pre>';
 				}
 			}
 
@@ -151,36 +126,23 @@ class Toolbar
 					$value = 'binary data';
 				}
 
-				$data['vars']['session'][esc($key)] = is_string($value) ? esc($value) : print_r($value, true);
+				$data['vars']['session'][esc($key)] = is_string($value) ? esc($value) : '<pre>' . esc(print_r($value, true)) . '</pre>';
 			}
 		}
 
 		foreach ($request->getGet() as $name => $value)
 		{
-			$data['vars']['get'][esc($name)] = is_array($value) ? esc(print_r($value, true)) : esc($value);
+			$data['vars']['get'][esc($name)] = is_array($value) ? '<pre>' . esc(print_r($value, true)) . '</pre>' : esc($value);
 		}
 
 		foreach ($request->getPost() as $name => $value)
 		{
-			$data['vars']['post'][esc($name)] = is_array($value) ? esc(print_r($value, true)) : esc($value);
+			$data['vars']['post'][esc($name)] = is_array($value) ? '<pre>' . esc(print_r($value, true)) . '</pre>' : esc($value);
 		}
 
-		foreach ($request->getHeaders() as $header => $value)
+		foreach ($request->headers() as $name => $header)
 		{
-			if (empty($value))
-			{
-				continue;
-			}
-
-			if (! is_array($value))
-			{
-				$value = [$value];
-			}
-
-			foreach ($value as $h)
-			{
-				$data['vars']['headers'][esc($h->getName())] = esc($h->getValueLine());
-			}
+			$data['vars']['headers'][esc($header->getName())] = esc($header->getValueLine());
 		}
 
 		foreach ($request->getCookie() as $name => $value)
@@ -196,18 +158,17 @@ class Toolbar
 			'contentType' => esc($response->getHeaderLine('content-type')),
 		];
 
-		$data['config'] = \CodeIgniter\Debug\Toolbar\Collectors\Config::display();
+		$data['config'] = Config::display();
 
 		if ($response->CSP !== null)
 		{
-			$response->CSP->addImageSrc( 'data:' );
+			$response->CSP->addImageSrc('data:');
 		}
 
 		return json_encode($data);
 	}
 
 	//--------------------------------------------------------------------
-
 	//--------------------------------------------------------------------
 
 	/**
@@ -221,7 +182,7 @@ class Toolbar
 	 *
 	 * @return string
 	 */
-	protected function renderTimeline(array $collectors, $startTime, int $segmentCount, int $segmentDuration, array &$styles): string
+	protected function renderTimeline(array $collectors, float $startTime, int $segmentCount, int $segmentDuration, array &$styles): string
 	{
 		$displayTime = $segmentCount * $segmentDuration;
 		$rows        = $this->collectTimelineData($collectors);
@@ -236,13 +197,14 @@ class Toolbar
 			$output .= "<td class='debug-bar-alignRight'>" . number_format($row['duration'] * 1000, 2) . ' ms</td>';
 			$output .= "<td class='debug-bar-noverflow' colspan='{$segmentCount}'>";
 
-			$offset = ((($row['start'] - $startTime) * 1000) / $displayTime) * 100;
-			$length = (($row['duration'] * 1000) / $displayTime) * 100;
+			$offset = ((((float) $row['start'] - $startTime) * 1000) / $displayTime) * 100;
+			$length = (((float) $row['duration'] * 1000) / $displayTime) * 100;
 
 			$styles['debug-bar-timeline-' . $styleCount] = "left: {$offset}%; width: {$length}%;";
-			$output                                     .= "<span class='timer debug-bar-timeline-{$styleCount}' title='" . number_format($length, 2) . "%'></span>";
-			$output                                     .= '</td>';
-			$output                                     .= '</tr>';
+
+			$output .= "<span class='timer debug-bar-timeline-{$styleCount}' title='" . number_format($length, 2) . "%'></span>";
+			$output .= '</td>';
+			$output .= '</tr>';
 
 			$styleCount++;
 		}
@@ -328,8 +290,8 @@ class Toolbar
 	 *
 	 * @param  RequestInterface  $request
 	 * @param  ResponseInterface $response
-	 * @global type $app
-	 * @return type
+	 * @global \CodeIgniter\CodeIgniter $app
+	 * @return void
 	 */
 	public function prepare(RequestInterface $request = null, ResponseInterface $response = null)
 	{
@@ -349,10 +311,10 @@ class Toolbar
 			$toolbar = Services::toolbar(config(Toolbar::class));
 			$stats   = $app->getPerformanceStats();
 			$data    = $toolbar->run(
-				$stats['startTime'],
-				$stats['totalTime'],
-				$request,
-				$response
+					$stats['startTime'],
+					$stats['totalTime'],
+					$request,
+					$response
 			);
 
 			helper('filesystem');
@@ -374,27 +336,24 @@ class Toolbar
 			// for this response
 			if ($request->isAJAX() || strpos($format, 'html') === false)
 			{
-				$response->setHeader('Debugbar-Time', $time)
-						 ->setHeader('Debugbar-Link', site_url("?debugbar_time={$time}"))
-						 ->getBody();
+				$response->setHeader('Debugbar-Time', "$time")
+						->setHeader('Debugbar-Link', site_url("?debugbar_time={$time}"))
+						->getBody();
 
 				return;
 			}
 
 			$script = PHP_EOL
-				. '<script type="text/javascript" {csp-script-nonce} id="debugbar_loader" '
-				. 'data-time="' . $time . '" '
-				. 'src="' . site_url() . '?debugbar"></script>'
-				. '<script type="text/javascript" {csp-script-nonce} id="debugbar_dynamic_script"></script>'
-				. '<style type="text/css" {csp-style-nonce} id="debugbar_dynamic_style"></style>'
-				. PHP_EOL;
+					. '<script type="text/javascript" {csp-script-nonce} id="debugbar_loader" '
+					. 'data-time="' . $time . '" '
+					. 'src="' . site_url() . '?debugbar"></script>'
+					. '<script type="text/javascript" {csp-script-nonce} id="debugbar_dynamic_script"></script>'
+					. '<style type="text/css" {csp-style-nonce} id="debugbar_dynamic_style"></style>'
+					. PHP_EOL;
 
-			if (strpos($response->getBody(), '</body>') !== false)
+			if (strpos($response->getBody(), '<head>') !== false)
 			{
-				$response->setBody(
-					str_replace('</body>', $script . '</body>', $response->getBody())
-				);
-
+				$response->setBody(preg_replace('/<head>/', '<head>' . $script, $response->getBody(), 1));
 				return;
 			}
 
@@ -414,6 +373,7 @@ class Toolbar
 			return;
 		}
 
+		// @codeCoverageIgnoreStart
 		$request = Services::request();
 
 		// If the request contains '?debugbar then we're
@@ -458,6 +418,7 @@ class Toolbar
 			http_response_code(404);
 			exit; // Exit here is needed to avoid load the index page
 		}
+		// @codeCoverageIgnoreEnd
 	}
 
 	/**
@@ -476,8 +437,8 @@ class Toolbar
 		{
 			$history = new History();
 			$history->setFiles(
-				Services::request()->getGet('debugbar_time'),
-				$this->config->maxHistory
+					Services::request()->getGet('debugbar_time'),
+					$this->config->maxHistory
 			);
 
 			$data['collectors'][] = $history->getAsArray();
