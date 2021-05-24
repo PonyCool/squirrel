@@ -105,6 +105,7 @@ class ComposerStaticInita08e07928ed66bf9e364fdeba377e90c
     );
 
     public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Kint' => __DIR__ . '/..' . '/kint-php/kint/src/Kint.php',
         'Kint_Object' => __DIR__ . '/..' . '/kint-php/kint/src/Object.php',
         'Kint_Object_Blob' => __DIR__ . '/..' . '/kint-php/kint/src/Object/Blob.php',
