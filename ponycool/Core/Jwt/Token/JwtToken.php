@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace PonyCool\Core\Jwt\Token;
 
@@ -13,287 +14,318 @@ use PonyCool\Core\Jwt\Exception\{TokenException,
     ArgumentException,
     SignatureException,
     MethodCallException,
-    BeforeValidException};
+    BeforeValidException
+};
+use ReflectionException;
 
 class JwtToken extends Token
 {
     /**
-     * @return mixed
+     * @return string
      */
-    public function getSecret()
+    public function getSecret(): string
     {
         return $this->secret;
     }
 
     /**
-     * @param mixed $secret
+     * @param string $secret
      */
-    public function setSecret($secret): void
+    public function setSecret(string $secret): void
     {
         $this->secret = $secret;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getAlg()
+    public function getAlg(): string
     {
 
         return $this->alg ?? 'HS256';
     }
 
     /**
-     * @param mixed $alg
+     * @param string $alg
      */
-    public function setAlg($alg): void
+    public function setAlg(string $alg): void
     {
         $this->alg = $alg;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getTyp()
+    public function getTyp(): string
     {
         return $this->typ ?? 'JWT';
     }
 
     /**
-     * @param mixed $typ
+     * @param string $typ
      */
-    public function setTyp($typ): void
+    public function setTyp(string $typ): void
     {
         $this->typ = $typ;
     }
 
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getIss()
+    public function getIss(): string
     {
         $issuer = 'PonyCool';
         return $this->iss ?? $issuer;
     }
 
     /**
-     * @param mixed $iss
+     * @param string $iss
      */
-    public function setIss($iss): void
+    public function setIss(string $iss): void
     {
         $this->iss = $iss;
     }
 
     /**
      * 过期时间，默认为签发时间+2小时
-     * @return mixed
+     * @return int
      */
-    public function getExp()
+    public function getExp(): int
     {
-        $timestamp = $this->exp ?? strtotime("+2 hours");
-        return $timestamp;
+        return $this->exp ?? strtotime("+2 hours");
     }
 
     /**
-     * @param mixed $exp
+     * @param int $exp
      */
-    public function setExp($exp): void
+    public function setExp(int $exp): void
     {
         $this->exp = $exp;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getSub()
+    public function getSub(): string
     {
         $subject = 'authenticate';
         return $this->sub ?? $subject;
     }
 
     /**
-     * @param mixed $sub
+     * @param string $sub
      */
-    public function setSub($sub): void
+    public function setSub(string $sub): void
     {
         $this->sub = $sub;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getAud()
+    public function getAud(): string
     {
         $audience = 'user';
         return $this->aud ?? $audience;
     }
 
     /**
-     * @param mixed $aud
+     * @param string $aud
      */
-    public function setAud($aud): void
+    public function setAud(string $aud): void
     {
         $this->aud = $aud;
     }
 
     /**
-     * @return mixed
+     * @return int
      */
-    public function getNbf()
+    public function getNbf(): int
     {
-        $timestamp = $this->nbf ?? time();
-        return $timestamp;
+        return $this->nbf ?? time();
     }
 
     /**
-     * @param mixed $nbf
+     * @param int $nbf
      */
-    public function setNbf($nbf): void
+    public function setNbf(int $nbf): void
     {
         $this->nbf = $nbf;
     }
 
     /**
-     * @return mixed
+     * @return int
      */
-    public function getIat()
+    public function getIat(): int
     {
-        $timestamp = $this->iat ?? time();
-        return $timestamp;
+        return $this->iat ?? time();
     }
 
     /**
-     * @param mixed $iat
+     * @param int $iat
      */
-    public function setIat($iat): void
+    public function setIat(int $iat): void
     {
         $this->iat = $iat;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getJti()
+    public function getJti(): ?string
     {
-        return $this->jti;
+        return $this->jti ?? null;
     }
 
     /**
-     * @param mixed $jti
+     * @param string|null $jti
      */
-    public function setJti($jti): void
+    public function setJti(?string $jti): void
     {
         $this->jti = $jti;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * @param mixed $name
+     * @param string $name
      */
-    public function setName($name): void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getUid()
+    public function getUid(): string
     {
         return $this->uid;
     }
 
     /**
-     * @param mixed $uid
+     * @param string $uid
      */
-    public function setUid($uid): void
+    public function setUid(string $uid): void
     {
         $this->uid = $uid;
     }
 
     /**
-     * @return mixed
+     * @return int|null
      */
-    public function getAdmin()
+    public function getAid(): ?int
+    {
+        return $this->aid;
+    }
+
+    /**
+     * @param int|null $aid
+     */
+    public function setAid(?int $aid): void
+    {
+        $this->aid = $aid;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getGid(): ?int
+    {
+        return $this->gid;
+    }
+
+    /**
+     * @param int|null $gid
+     */
+    public function setGid(?int $gid): void
+    {
+        $this->gid = $gid;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAdmin(): string
     {
         return $this->admin ?? 'false';
     }
 
     /**
-     * @param mixed $admin
+     * @param string $admin
      */
-    public function setAdmin($admin): void
+    public function setAdmin(string $admin): void
     {
         $this->admin = $admin;
     }
 
     /**
-     * @return mixed
+     * @return array
      */
-    public function getHeader()
+    public function getHeader(): array
     {
         return $this->header;
     }
 
     /**
-     * @param mixed $header
+     * @param array $header
      */
-    public function setHeader($header): void
+    public function setHeader(array $header): void
     {
         $this->header = $header;
     }
 
     /**
-     * @return mixed
+     * @return array
      */
-    public function getPayload()
+    public function getPayload(): array
     {
         return $this->payload;
     }
 
     /**
-     * @param mixed $payload
+     * @param array $payload
      */
-    public function setPayload($payload): void
+    public function setPayload(array $payload): void
     {
         $this->payload = $payload;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getSignature()
+    public function getSignature(): string
     {
         return $this->signature;
     }
 
     /**
-     * @param mixed $signature
+     * @param string $signature
      */
-    public function setSignature($signature): void
+    public function setSignature(string $signature): void
     {
         $this->signature = $signature;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getToken()
+    public function getToken(): string
     {
         return $this->token;
     }
 
     /**
-     * @param mixed $token
+     * @param string $token
      */
-    public function setToken($token): void
+    public function setToken(string $token): void
     {
         $this->token = $token;
     }
@@ -316,6 +348,8 @@ class JwtToken extends Token
             'sub' => $this->getSub(),
             'name' => $this->getName(),
             'uid' => $this->getUid(),
+            'aid' => $this->getAid(),
+            'gid' => $this->getGid(),
             'admin' => $this->getAdmin(),
             'aud' => $this->getAud(),
             'nbf' => $this->getNbf(),
@@ -330,8 +364,7 @@ class JwtToken extends Token
             Base64Url::base64UrlEncode(Json::jsonEncode($this->getPayload())),
             $signature
         ];
-        $token = implode(".", $tokenArr);
-        return $token;
+        return implode(".", $tokenArr);
     }
 
     /**
@@ -339,7 +372,7 @@ class JwtToken extends Token
      * @param string $secret
      * @param string $token
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function verify(string $secret, string $token): bool
     {
@@ -380,7 +413,7 @@ class JwtToken extends Token
         ];
         foreach ($payload as $k => $v) {
             if (key_exists($k, $timestampArr)) {
-                $res = $validation->validator($v);
+                $res = $validation->validator((string)$v);
                 if (!$res) {
                     throw new ValueException($timestampArr[$k] . "时间格式错误");
                 }
@@ -400,13 +433,13 @@ class JwtToken extends Token
         // 生效时间之前不接收处理该token
         if ($this->getNbf() > $timestamp) {
             throw new BeforeValidException(
-                date(DateTime::ISO8601, $this->getNbf()) . "之前无法处理令牌"
+                date('Y-m-d\TH:i:sO', $this->getNbf()) . "之前无法处理令牌"
             );
         }
         // 签发时间大于当前服务器时间验证失败
         if ($this->getIat() > $timestamp) {
             throw new BeforeValidException(
-                date(DateTime::ISO8601, $this->getIat()) . "之前无法处理令牌"
+                date('Y-m-d\TH:i:sO', $this->getIat()) . "之前无法处理令牌"
             );
         }
         // 过期时间小于、等于当前服务器时间验证失败

@@ -1,13 +1,13 @@
 <?php
 
 
-namespace PonyCool\Model;
+namespace PonyCool\Models;
 
 class AccountModel extends BaseModel
 {
     protected $table = 'account';
     protected $primaryKey = 'id';
-    protected $returnType = 'PonyCool\Entity\Account';
+    protected $returnType = 'PonyCool\Entities\Account';
     protected $useSoftDeletes = true;
     protected $allowedFields = ['account_name', 'pwd', 'salt'];
     protected $useTimestamps = true;

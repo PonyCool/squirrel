@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PonyCool\Entity;
+namespace PonyCool\Entities;
 
-use CodeIgniter\Entity;
+use CodeIgniter\Entity\Entity;
 use PonyCool\Library\SaltLib;
 
 class Account extends Entity

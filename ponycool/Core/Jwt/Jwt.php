@@ -1,8 +1,10 @@
 <?php
-
+declare(strict_types=1);
 
 namespace PonyCool\Core\Jwt;
 
+use PonyCool\Core\Jwt\Base64\Base64Url;
+use PonyCool\Core\Jwt\Json\Json;
 use ReflectionMethod;
 use PonyCool\Core\Jwt\Factory\JwtTokenFactory;
 use PonyCool\Core\Jwt\Validation\ValidationStrategy;
@@ -83,10 +85,28 @@ class Jwt
         $factory = new JwtTokenFactory();
         $token = $factory->createToken();
         try {
-            $res = $token->verify($secret, $t);
-            return $res;
+            return $token->verify($secret, $t);
         } catch (TokenException $exception) {
             return false;
         }
+    }
+
+    /**
+     * 获取有效载荷
+     * @param string $token
+     * @return array
+     */
+    public function getPayload(string $token): array
+    {
+        $payload = [];
+        try {
+            $token = explode(".", $token);
+            if (3 !== count($token)) {
+                throw new TokenException("不合法的TOKEN");
+            }
+            $payload = Json::jsonDecode(Base64Url::base64UrlDecode($token[1]));
+        } catch (TokenException $exception) {
+        }
+        return $payload;
     }
 }

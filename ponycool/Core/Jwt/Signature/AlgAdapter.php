@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace PonyCool\Core\Jwt\Signature;
 
@@ -7,23 +8,23 @@ use PonyCool\Core\Jwt\Base64\Base64Url;
 
 class AlgAdapter implements AlgInterface
 {
-    protected $alg;
-    protected $secret;
-    protected $header;
-    protected $payload;
+    protected object $alg;
+    protected string $secret;
+    protected string $header;
+    protected string $payload;
 
     /**
      * @return mixed
      */
-    public function getAlg()
+    public function getAlg(): object
     {
         return $this->alg;
     }
 
     /**
-     * @param mixed $alg
+     * @param object $alg
      */
-    public function setAlg($alg): void
+    public function setAlg(object $alg): void
     {
         $this->alg = $alg;
     }
@@ -31,53 +32,53 @@ class AlgAdapter implements AlgInterface
     /**
      * @return mixed
      */
-    public function getSecret()
+    public function getSecret(): string
     {
         return $this->secret;
     }
 
     /**
-     * @param mixed $secret
+     * @param string $secret
      */
-    public function setSecret($secret): void
+    public function setSecret(string $secret): void
     {
         $this->secret = $secret;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getHeader()
+    public function getHeader(): string
     {
         return $this->header;
     }
 
     /**
-     * @param mixed $header
+     * @param string $header
      */
-    public function setHeader($header): void
+    public function setHeader(string $header): void
     {
         $this->header = $header;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getPayload()
+    public function getPayload(): string
     {
         return $this->payload;
     }
 
     /**
-     * @param mixed $payload
+     * @param string $payload
      */
-    public function setPayload($payload): void
+    public function setPayload(string $payload): void
     {
         $this->payload = $payload;
     }
 
 
-    public function __construct($alg)
+    public function __construct(object $alg)
     {
         $this->setAlg($alg);
     }

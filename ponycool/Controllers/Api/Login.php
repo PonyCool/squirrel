@@ -1,18 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace PonyCool\Control\Api;
+namespace PonyCool\Controllers\Api;
 
-use PonyCool\Service\LoginService;
+use CodeIgniter\HTTP\ResponseInterface;
+use PonyCool\Services\LoginService;
 use PonyCool\Library\Code;
 
-class Login extends BaseController
+class Login extends Base
 {
     /**
-     * 认证授权
-     * @return \CodeIgniter\HTTP\ResponseInterface
+     *  登录
+     * @return ResponseInterface
      */
-    public function Authentication()
+    public function index(): ResponseInterface
     {
         $accountName = $this->request->getGet('account_name');
         $pwd = $this->request->getGet('pwd');

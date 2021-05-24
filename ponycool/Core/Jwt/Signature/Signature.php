@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 
 namespace PonyCool\Core\Jwt\Signature;
 
@@ -19,8 +19,7 @@ class Signature
         $alg = $this->loadAlg($header['alg']);
         $algAdapter = new AlgAdapter($alg);
         $algAdapter->init($secret, $header, $payload);
-        $signature = $algAdapter->encrypt();
-        return $signature;
+        return $algAdapter->encrypt();
     }
 
 
@@ -35,8 +34,7 @@ class Signature
     public function verify(string $secret, array $header, array $payload, string $rawSignature): bool
     {
         $signature = $this->generate($secret, $header, $payload);
-        $res = ($rawSignature === $signature) ? true : false;
-        return $res;
+        return $rawSignature === $signature;
     }
 
 
@@ -52,7 +50,6 @@ class Signature
         if (!class_exists($algClass)) {
             throw new AlgException("JWT签名加密算法不存在");
         }
-        $algObj = new $algClass;
-        return $algObj;
+        return new $algClass;
     }
 }

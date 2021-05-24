@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 
 namespace PonyCool\Core\Jwt\Json;
 
@@ -10,7 +10,7 @@ class Json
 {
     /**
      * JSON 编码
-     * @param $input
+     * @param array $input
      * @return false|string
      */
     public static function jsonEncode(array $input)
@@ -68,9 +68,7 @@ class Json
             JSON_ERROR_UTF8 => '格式错误的UTF-8字符' //PHP >= 5.3.3
         );
         throw new DomainException(
-            isset($messages[$errno])
-                ? $messages[$errno]
-                : 'Unknown JSON error: ' . $errno
+            $messages[$errno] ?? 'Unknown JSON error: ' . $errno
         );
     }
 }

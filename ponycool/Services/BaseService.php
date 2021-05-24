@@ -1,7 +1,7 @@
 <?php
 
 
-namespace PonyCool\Service;
+namespace PonyCool\Services;
 
 use Config\Database;
 use CodeIgniter\Database\Exceptions\DatabaseException;
@@ -13,7 +13,7 @@ class BaseService
 
     public function __construct()
     {
-        $env = getenv('CI_ENVIRONMENT');
+        $env = getenv('default');
         $this->setDb($env);
     }
 

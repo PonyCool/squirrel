@@ -4,39 +4,43 @@ namespace PonyCool\Core\Jwt\Token;
 abstract class Token
 {
     // 密钥
-    public $secret;
+    public string $secret;
     // 签名算法
-    public $alg;
+    public string $alg;
     // 令牌类型
-    public $typ;
+    public string $typ;
     // issuer 签发人
-    public $iss;
+    public string $iss;
     // expiration time 过期时间
-    public $exp;
+    public int $exp;
     // subject 主题
-    public $sub;
+    public string $sub;
     // audience 受众
-    public $aud;
+    public string $aud;
     // Not Before 生效时间
-    public $nbf;
+    public int $nbf;
     // Issued At 签发时间
-    public $iat;
+    public int $iat;
     // JWT ID 编号
-    public $jti;
+    public ?string $jti;
     // 用户名
-    public $name;
+    public string $name;
     // 用户UID
-    public $uid;
+    public string $uid;
+    // 用户账户全局ID
+    public ?int $aid;
+    // 用户全局ID
+    public ?int $gid;
     // 管理用户
-    public $admin;
+    public string $admin;
     // 头部
-    public $header;
+    public array $header;
     // 有效负载
-    public $payload;
+    public array $payload;
     // 签名
-    public $signature;
+    public string $signature;
     // token
-    public $token;
+    public string $token;
 
     abstract public function get(): string;
 

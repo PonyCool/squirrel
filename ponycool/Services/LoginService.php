@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace PonyCool\Service;
+namespace PonyCool\Services;
 
 use PonyCool\Core\Jwt\Jwt;
-use PonyCool\Model\AccountModel;
+use PonyCool\Models\AccountModel;
 use Exception;
 
 class LoginService extends BaseService
@@ -25,7 +25,7 @@ class LoginService extends BaseService
         if (!is_null($account)) {
             $encryPwd = hash_hmac('sha256', $pwd, $account->salt);
             if ($account->pwd === $encryPwd) {
-                $secret = getenv('app.jwt.secret');
+                $secret = getenv('jwt.secret');
                 try {
                     $jwt = new Jwt();
                     $token = $jwt->getToken(
@@ -39,12 +39,14 @@ class LoginService extends BaseService
                             'sub' => 'login',
                             'aud' => 'www.ponycool.com',
                             'name' => $account->account_name,
+                            'aid' => 0,
+                            'gid' => 0,
                             'uid' => $account->id,
                             'admin' => (1 === $account->id) ? 'true' : 'false',
                         ]
                     );
                 } catch (Exception $exception) {
-
+                    var_dump($exception);
                 }
             }
         }

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace PonyCool\Model;
+namespace PonyCool\Models;
 
 use CodeIgniter\Model;
 use CodeIgniter\Database\ConnectionInterface;
