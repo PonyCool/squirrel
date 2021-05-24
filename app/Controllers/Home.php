@@ -1,6 +1,6 @@
-<?php namespace App\Controllers;
+<?php
 
-use App\Models\UserModel;
+namespace App\Controllers;
 
 class Home extends BaseController
 {
@@ -8,7 +8,4 @@ class Home extends BaseController
 	{
 		return view('welcome_message');
 	}
-
-	//--------------------------------------------------------------------
-
 }

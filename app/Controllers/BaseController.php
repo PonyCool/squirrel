@@ -3,6 +3,11 @@
 namespace App\Controllers;
 
 use CodeIgniter\Controller;
+use CodeIgniter\HTTP\CLIRequest;
+use CodeIgniter\HTTP\IncomingRequest;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class BaseController
@@ -13,11 +18,16 @@ use CodeIgniter\Controller;
  *     class Home extends BaseController
  *
  * For security be sure to declare any new methods as protected or private.
- *
- * @package CodeIgniter
  */
+
 class BaseController extends Controller
 {
+	/**
+	 * Instance of the main Request object.
+	 *
+	 * @var IncomingRequest|CLIRequest
+	 */
+	protected $request;
 
 	/**
 	 * An array of helpers to be loaded automatically upon
@@ -26,21 +36,23 @@ class BaseController extends Controller
 	 *
 	 * @var array
 	 */
-	protected $helpers = [ ];
+	protected $helpers = [];
 
 	/**
 	 * Constructor.
 	 *
+	 * @param RequestInterface  $request
+	 * @param ResponseInterface $response
+	 * @param LoggerInterface   $logger
 	 */
-	public function initController(\CodeIgniter\HTTP\RequestInterface $request, \CodeIgniter\HTTP\ResponseInterface $response, \Psr\Log\LoggerInterface $logger)
+	public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
 	{
 		// Do Not Edit This Line
 		parent::initController($request, $response, $logger);
+
 		//--------------------------------------------------------------------
 		// Preload any models, libraries, etc, here.
 		//--------------------------------------------------------------------
-		// E.g.:
-		// $this->session = \Config\Services::session();
-
+		// E.g.: $this->session = \Config\Services::session();
 	}
 }
