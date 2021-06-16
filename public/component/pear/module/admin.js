@@ -103,6 +103,7 @@ layui.define(['message', 'table', 'jquery', 'element', 'yaml', 'form', 'tab', 'm
 					},
 					done: function() {
 						sideMenu.selectItem(param.menu.select);
+						pearAdmin.collaspe(param);
 					}
 				});
 			}
@@ -194,6 +195,14 @@ layui.define(['message', 'table', 'jquery', 'element', 'yaml', 'form', 'tab', 'm
 				setTimeout(function() {
 					$(".loader-main").fadeOut(200);
 				}, param.other.keepLoad)
+			}
+			
+			this.collaspe = function(param) {
+				if(param.menu.collaspe) {
+					if ($(window).width() >= 768) {
+						collaspe()
+					}
+				}
 			}
 
 			this.themeRender = function(option) {
